@@ -48,6 +48,10 @@ class Tile
     end
 
     def reveal
+        if self.revealed?
+            puts "Square already revealed."
+            return
+        end
         @revealed = true
     end
 
