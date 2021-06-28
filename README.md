@@ -1,2 +1,2 @@
-run 'ruby minesweeper.rb' to run the game.
+run 'ruby minesweeper.rb' in the terminal to run the game.
 Enjoy :)
