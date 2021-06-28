@@ -1,14 +1,13 @@
 require_relative "tile"
-require "byebug"
 
 class Board
     attr_reader :board, :size, :num_of_bombs, :max_bombs
 
-    def initialize(grid_size)
-        @size = grid_size
-        @board = Array.new(grid_size) { Array.new(grid_size, nil) }
+    def initialize(difficulty)
+        @size = difficulty[:grid_size]
+        @board = Array.new(@size) { Array.new(@size, nil) }
         @bombs_added = false
-        @max_bombs = 10
+        @max_bombs = difficulty[:bombs]
         self.populate
     end
 
@@ -26,7 +25,7 @@ class Board
     end
 
     def add_bombs_away_from(pos)
-        starting_area = self[pos].neighbors
+        starting_area = self[pos].neighbors << self[pos]
         available_area_randomized = board.flatten.reject { |tile| starting_area.include?(tile) }.shuffle
 
         max_bombs.times do 
@@ -51,7 +50,6 @@ class Board
 
     def [](pos)
         row, col = pos
-        # debugger
         @board[row][col]
     end
 
@@ -60,13 +58,17 @@ class Board
         @board[row][col] = val
     end
 
-    def render
+    def render()
         puts "  #{(0...size).to_a.join(" ")}"
         board.each_with_index do |row, idx|
             print idx.to_s
             row.each { |tile| print " #{tile}" }
             puts
         end
+    end
+
+    def reveal_all_bombs
+        board.flatten.each { |tile| tile.reveal if tile.bombed? }
     end
 
     def reveal(pos)

@@ -1,3 +1,5 @@
+require "colorize"
+
 class Tile
     attr_reader :board, :position
 
@@ -66,12 +68,31 @@ class Tile
         end
     end
 
+    def color(bomb_count=0)
+        return :light_red if flagged?
+        return :red if bombed?
+
+        case bomb_count
+        when 1
+            :blue
+        when 2
+            :green
+        when 3
+            :light_magenta
+        when 4
+            :cyan
+        else
+            :default
+        end
+    end
+
     def to_s
-        return "F" if flagged?
+        return "F".colorize(color) if flagged?
 
         if revealed?
+            return "B".colorize(color) if bombed?
             nbc = neighbor_bomb_count
-            nbc.zero? ? "_" : nbc.to_s 
+            nbc.zero? ? "_".colorize(color) : nbc.to_s.colorize(color(nbc))
         else
             "*"
         end
