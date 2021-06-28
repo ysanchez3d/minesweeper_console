@@ -21,9 +21,18 @@ class MineSweeper
                 if !board.bombs_added?
                     board.add_bombs_away_from(pos)
                 end
-                board.reveal(pos)
+
+                if board[pos].flagged?
+                    puts "Yout must unflag this square before revealing it."
+                else
+                    board.reveal(pos)
+                end
             elsif cmd == "f"
-                board.flag(pos)
+                if board[pos].revealed?
+                    puts "Cannot flag a revealed square"
+                else
+                    board.flag(pos)
+                end
             end
 
             if board.lose?
@@ -54,8 +63,8 @@ class MineSweeper
 
     def get_pos
         pos = nil
-        puts "Enter a position to reveal a square (ex: 2,3)"
-        while pos.nil? || board.valid_pos?(pos)
+        puts "Enter a position (ex: 2,3)"
+        while pos.nil? || !board.valid_pos?(pos)
             pos = gets.chomp.split(",").map(&:to_i)
         end
         pos

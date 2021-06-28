@@ -15,10 +15,9 @@ class Tile
         
         (col-1..col+1).each do |col|
             top_pos, btm_pos, sde_pos = [row-1, col], [row+1, col], [row, col]
-            top_tile, btm_tile, sde_tile = board[top_pos], board[btm_pos], board[sde_pos]
-            top_neighbors << top_tile if board.valid_pos?(top_pos)
-            bottom_neighbors << btm_tile if board.valid_pos?(btm_pos)
-            side_neighbors << sde_tile if board.valid_pos?(sde_pos) && sde_tile != self
+            top_neighbors << board[top_pos] if board.valid_pos?(top_pos)
+            bottom_neighbors << board[btm_pos] if board.valid_pos?(btm_pos)
+            side_neighbors << board[sde_pos] if board.valid_pos?(sde_pos) && board[sde_pos] != self
         end
         top_neighbors + side_neighbors + bottom_neighbors
     end
@@ -48,10 +47,6 @@ class Tile
     end
 
     def reveal
-        if self.revealed?
-            puts "Square already revealed."
-            return
-        end
         @revealed = true
     end
 
@@ -59,8 +54,21 @@ class Tile
         self.to_s
     end
 
+    def to_s_cheat
+        return "B" if bombed?
+        return "F" if flagged?
+
+        if revealed?
+            nbc = neighbor_bomb_count
+            nbc.zero? ? "_" : nbc.to_s 
+        else
+            "*"
+        end
+    end
+
     def to_s
         return "F" if flagged?
+
         if revealed?
             nbc = neighbor_bomb_count
             nbc.zero? ? "_" : nbc.to_s 
@@ -69,12 +77,3 @@ class Tile
         end
     end
 end
-
-#pos "M" = [1,4] => [5,6,7,5,3,2,6,4]
-#pos "9" = [0,8] => [2,1,8]
-#pos "T" = [2,1] => [4,5,1,2,3]
-# arr = [
-#     [1, 2 ,3,4, 5 ,6,7,8,"9"],
-#     [3, 4 ,5,6,"M",7,9,1, 2 ],
-#     [2,"T",1,2, 3 ,5,7,8, 1 ]
-# ]

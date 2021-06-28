@@ -1,7 +1,8 @@
 require_relative "tile"
+require "byebug"
 
 class Board
-    attr_reader :board, :size, :num_of_bombs
+    attr_reader :board, :size, :num_of_bombs, :max_bombs
 
     def initialize(grid_size)
         @size = grid_size
@@ -26,13 +27,22 @@ class Board
 
     def add_bombs_away_from(pos)
         starting_area = self[pos].neighbors
-        available_area_randomized = board.flatten.reject { |tile| neighbors.include?(tile) }.shuffle
+        available_area_randomized = board.flatten.reject { |tile| starting_area.include?(tile) }.shuffle
 
         max_bombs.times do 
-            tile = available_area.shift
+            tile = available_area_randomized.shift
             tile.add_bomb
         end
         @bombs_added = true
+    end
+
+    def cheat_print
+        puts "  #{(0...size).to_a.join(" ")}"
+        board.each_with_index do |row, idx|
+            print idx.to_s
+            row.each { |tile| print " #{tile.to_s_cheat}" }
+            puts
+        end
     end
 
     def valid_pos?(pos)
@@ -41,6 +51,7 @@ class Board
 
     def [](pos)
         row, col = pos
+        # debugger
         @board[row][col]
     end
 
@@ -59,7 +70,12 @@ class Board
     end
 
     def reveal(pos)
-        self[pos].reveal
+        tile = self[pos]
+        tile.reveal
+        if tile.neighbor_bomb_count.zero? && !tile.bombed?
+            neighbors = tile.neighbors.select { |tile| !tile.revealed? }
+            neighbors.each { |tile| reveal(tile.position) }
+        end
     end
 
     def flag(pos)
@@ -67,7 +83,7 @@ class Board
     end
 
     def win?
-        board.flatten.reject(&:bombed?).all? { |tile| tile.revealed }
+        board.flatten.reject(&:bombed?).all? { |tile| tile.revealed? }
     end
 
     def lose?
@@ -75,6 +91,6 @@ class Board
     end
 
     def game_over?
-        win? || lose
+        win? || lose?
     end
 end
